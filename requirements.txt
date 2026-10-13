@@ -1,0 +1,9 @@
+chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2
+faster-whisper==1.2.1
+torch==2.6.0
+torchaudio==2.6.0
+sounddevice==0.5.6
+soundfile==0.14.0
+fastapi==0.143.0
+uvicorn==0.54.0
+websockets==17.2

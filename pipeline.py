@@ -15,7 +15,7 @@ from pathlib import Path
 OLLAMA_MODEL = "will"
 MAX_HISTORY = 20  # older messages are dropped so prompts stay short
 MIN_WORDS = 6  # shorter sentences get merged into the next one
-VOICE = str(Path("~/Projects/WilliamAI/voice/WillVoiceFinal.wav").expanduser())
+VOICE = str(Path(__file__).parent / "voice" / "WillVoiceFinal.wav")
 history = []
 # GPU on the desktop, CPU on the laptop
 gpu = torch.cuda.is_available()
@@ -76,7 +76,9 @@ def AIresponse(heard, history):
             # only cut after a finished sentence; the tail may still be mid-sentence
             ends = [m.end() for m in re.finditer(r"[.!?]\s+", pending)]
             if ends and len(pending[: ends[-1]].split()) >= MIN_WORDS:
-                print(f"llm:   {time.time() - t:.1f}s  -> {pending[: ends[-1]].strip()!r}")
+                print(
+                    f"llm:   {time.time() - t:.1f}s  -> {pending[: ends[-1]].strip()!r}"
+                )
                 yield pending[: ends[-1]].strip()
                 pending = pending[ends[-1] :]
     if pending.strip():
