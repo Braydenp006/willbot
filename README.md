@@ -54,4 +54,5 @@ Open http://localhost:8000, hold the button (or Space) and talk.
 `python pipeline.py` runs a terminal-only version using your mic directly, used for testing, 
 no 3d head in this version.
 
-'python makevoiceline.py' can generate any voiceline you want, it'll ask for a text input and the output file name, using the same voice chatterbox uses defined in your piepline.py
+'python makevoiceline.py' can generate any voiceline you want, it'll ask for a text input and 
+the output file name, using the same voice chatterbox uses defined in your piepline.py
