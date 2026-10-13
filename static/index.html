@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head><title>Will</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        background: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+      h1 { font-weight: bold; margin: 0; }
+      #head { width: 800px; height: 800px; outline: 0px dashed #333; }
+      #talk {
+        font: inherit;
+        padding: 12px 24px;
+        background: #000;
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 8px;
+        user-select: none;
+        touch-action: none;
+      }
+      #thinking {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #444;
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        visibility: hidden;
+      }
+      #thinking.on { visibility: visible; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <h1>Will</h1>
+    <div id="head"></div>
+    <button id="talk">Talk to William</button>
+    <div id="thinking"></div>
+    <p id="log"></p>
+      <script>
+        const audioCtx = new AudioContext();
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.connect(audioCtx.destination);
+        window.analyser = analyser;
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        const ws = new WebSocket(`${proto}://${location.host}/ws`);
+        const log = document.getElementById("log");
+        const button = document.getElementById("talk");
+        const thinking = document.getElementById("thinking");
+        let stream, recorder, chunks;
+
+        button.onpointerdown = async () => {
+          // browsers still fire pointer events on disabled buttons
+          if (button.disabled) return;
+          audioCtx.resume();
+          stream ??= await navigator.mediaDevices.getUserMedia({ audio: true });
+          chunks = [];
+          recorder = new MediaRecorder(stream);
+          recorder.ondataavailable = (e) => chunks.push(e.data);
+          recorder.onstop = () => ws.send(new Blob(chunks, { type: recorder.mimeType }));
+          recorder.start();
+          button.textContent = "Listening...";
+        };
+
+        button.onpointerup = () => {
+          if (recorder?.state !== "recording") return;
+          recorder.stop();
+          button.textContent = "Pondering...";
+          button.disabled = true;
+          thinking.classList.add("on")
+        };
+        document.onkeydown = (e) => {
+          if (e.code !== "Space") return;
+          e.preventDefault();
+          if (!e.repeat) button.onpointerdown();
+        };
+        document.onkeyup = (e) => {
+          if (e.code === "Space") button.onpointerup();
+        };
+        const HEAD_START = 1.5; // seconds of slack to soak up slow generation
+        let nextTime = 0;
+
+        ws.onmessage = async (event) => {
+          if (event.data === "done") {
+            button.textContent = "Talk to William";
+            button.disabled = false;
+            return;
+          }
+          const buffer = await audioCtx.decodeAudioData(await event.data.arrayBuffer());
+          const source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(analyser);
+          nextTime = Math.max(nextTime, audioCtx.currentTime + HEAD_START);
+          source.start(nextTime);
+          nextTime += buffer.duration;
+          thinking.classList.remove("on");
+        };
+      </script>
+    <script type="module" src="/static/head.js"></script>
+  </body>
+</html>

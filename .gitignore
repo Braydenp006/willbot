@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+willchat/
+voice/
+headV1/
+static/will.glb
+Letterboxd-list-scraper/
