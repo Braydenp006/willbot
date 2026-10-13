@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pipeline import webTranscribe, AIresponse, voiceResponse
@@ -19,7 +19,10 @@ async def ws(websocket: WebSocket):
     await websocket.accept()
     history = []
     while True:
-        data = await websocket.receive_bytes()
+        try:
+            data = await websocket.receive_bytes()
+        except WebSocketDisconnect:  # tab closed or server shutting down
+            return
         print(f"got {len(data)} bytes")
         heard = await asyncio.to_thread(webTranscribe, data)
         chunks = AIresponse(heard, history)
