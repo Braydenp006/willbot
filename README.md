@@ -41,11 +41,10 @@ ollama create will -f Modelfile
 ## How to use william
 ```sh
 
-`start.sh` is for my setup using fish shell + Tailscale to reach it from a phone. Not needed locally
+`start.sh` is the start script, I use Tailscale to reach it from a phone / other devices. 
+Not needed locally
 
 clone this repo, add the required files and install all requiremnts previously stated
-
-if you are in a fish shell cd into the repo and run ./start.sh, it should ask for your password
 
 Open http://localhost:8000, hold the button (or Space) and talk.
 
