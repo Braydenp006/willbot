@@ -50,7 +50,7 @@
   <body>
     <h1>Will</h1>
     <div id="head"></div>
-    <button id="talk">Talk to William</button>
+    <button id="talk" disabled>Connecting...</button>
     <div id="thinking"></div>
     <p id="log"></p>
       <script>
@@ -66,9 +66,42 @@
         const thinking = document.getElementById("thinking");
         let stream, recorder, chunks;
 
+        ws.onopen = () => {
+          button.textContent = "Talk to William";
+          button.disabled = false;
+        };
+        let offline = false;
+        function goOffline() {
+          offline = true;
+          recorder?.state === "recording" && recorder.stop();
+          button.textContent = "Server offline";
+          button.disabled = true;
+          thinking.classList.remove("on");
+        }
+        ws.onclose = goOffline;
+
+        // a socket killed by tailscale going down never fires onclose on the phone, so poll over HTTP
+        let failures = 0;
+        async function checkServer() {
+          if (document.hidden) return;
+          try {
+            const r = await fetch("/ping", { cache: "no-store", signal: AbortSignal.timeout(4000) });
+            if (!r.ok) throw r.status; // tailscale serve answers 502 when uvicorn is down
+            failures = 0;
+            if (offline) location.reload(); // server is back
+          } catch {
+            // one slow check on a bad connection shouldn't reload the page and wipe the chat
+            if (++failures >= 2) goOffline();
+          }
+        }
+        setInterval(checkServer, 5000);
+        document.onvisibilitychange = checkServer;
+        checkServer();
+
         button.onpointerdown = async () => {
           // browsers still fire pointer events on disabled buttons
           if (button.disabled) return;
+          checkServer();
           audioCtx.resume();
           stream ??= await navigator.mediaDevices.getUserMedia({ audio: true });
           chunks = [];

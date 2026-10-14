@@ -24,9 +24,9 @@ You need four files (paths are fixed in the code; rename to match or edit the co
 
 | File | What it is |
 |---|---|
-| `voice/WillVoiceFinal.wav` | ~10–20 s clean recording of the person speaking. Chatterbox clones this voice. |
+| `Assets/voice/WillVoiceFinal.wav` | ~10–20 s clean recording of the person speaking. Chatterbox clones this voice. |
 | `static/will.glb` | 3D head model. For lip sync it needs a shape key / morph target named `jawOpen`. |
-| `voice/voicelines/mmm.wav` | Sound played when you click the head to satisfy it's hunger. Generate one with `python makevoiceline.py`. |
+| `Assets/voice/voicelines/mmm.wav` | Sound played when you click the head to satisfy it's hunger. Generate one with `python makevoiceline.py`. |
 | Ollama model `will` | The personality, built from a Modelfile (below). |
 
 Create the character model:

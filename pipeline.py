@@ -15,7 +15,7 @@ from pathlib import Path
 OLLAMA_MODEL = "will"
 MAX_HISTORY = 20  # older messages are dropped so prompts stay short
 MIN_WORDS = 6  # shorter sentences get merged into the next one
-VOICE = str(Path(__file__).parent / "voice" / "WillVoiceFinal.wav")
+VOICE = str(Path(__file__).parent / "Assets" / "voice" / "WillVoiceFinal.wav")
 history = []
 # GPU on the desktop, CPU on the laptop
 gpu = torch.cuda.is_available()

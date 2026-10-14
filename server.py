@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,12 +7,23 @@ from pipeline import webTranscribe, AIresponse, voiceResponse
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/voicelines", StaticFiles(directory="voice/voicelines"), name="voicelines")
+app.mount(
+    "/voicelines", StaticFiles(directory="Assets/voice/voicelines"), name="voicelines"
+)
 
 
 @app.get("/")
 def index():
     return FileResponse("static/index.html")
+
+
+@app.get("/ping")
+def ping():
+    return {}
+
+
+# the page polls /ping every few seconds; keep it out of the access log
+logging.getLogger("uvicorn.access").addFilter(lambda r: r.args[2] != "/ping")
 
 
 @app.websocket("/ws")
