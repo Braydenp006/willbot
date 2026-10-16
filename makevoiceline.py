@@ -8,5 +8,5 @@ if __name__ == "__main__":
         file = str(input("Enter name for file: "))
 
         audio = voiceResponse(prompt)
-        with open(f"voice/voicelines/{file}.wav", "wb") as f:
+        with open(f"Assets/voice/voicelines/{file}.wav", "wb") as f:
             f.write(audio)

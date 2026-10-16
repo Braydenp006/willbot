@@ -44,20 +44,12 @@ let berry = null;
 let flight = 0;
 let chewing = 0;
 
-const audioCtx = window.analyser.context;
-let mmm = null;
-fetch("/voicelines/mmm.wav")
-  .then((r) => r.arrayBuffer())
-  .then((b) => audioCtx.decodeAudioData(b))
-  .then((buf) => (mmm = buf))
-  .catch((e) => console.error("mmm.wav failed to load", e));
+const mmm = new Audio("/voicelines/mmm.wav");
+const greeting = new Audio("/voicelines/zara.wav");
 
-function playMmm() {
-  if (!mmm) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = mmm;
-  source.connect(window.analyser);
-  source.start();
+function playVoiceline(vLine) {
+  vLine.currentTime  = 0;
+  vLine.play().catch((e) => console.error("voiceline failed:", e));
 }
 
 box.addEventListener("pointerdown", () => {
@@ -104,7 +96,7 @@ renderer.setAnimationLoop((time) => {
       pivot.remove(berry);
       berry = null;
       chewing = 1.5;
-      playMmm();
+      playVoiceline(mmm);
     }
   } else if (chewing > 0) {
     chewing -= dt;

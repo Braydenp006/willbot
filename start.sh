@@ -1,9 +1,9 @@
-#/bin/sh
+#!/bin/sh
 
 cleanup() {
   echo "Ctrl+C pressed, cleaning up..."
-  sudo tailscale serve reset
-  sudo systemctl stop tailscaled
+  tailscale serve reset$()
+  kill "$UVICORN" 2>/dev/null
   pkill -x ollama # frees the GPU; pipeline.py keeps the model loaded forever
   exit 0
 }
@@ -20,5 +20,7 @@ tailscale up
 tailscale serve --bg 8000
 
 cd "$(dirname "$(realpath "$0")")" || exit 1
-source .venv/bin/activate
-uvicorn server:app --reload
+. .venv/bin/activate
+uvicorn server:app --reload &
+UVICORN=$!
+wait "$UVICORN"
