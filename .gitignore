@@ -1,7 +1,9 @@
 .venv/
+.env
 __pycache__/
 static/will.glb
 Assets/headV1/
 Assets/ModelTraining/
 Assets/Letterboxd-list-scraper/
 Assets/voice/
+ollama.log

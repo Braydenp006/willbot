@@ -61,6 +61,7 @@ box.addEventListener("pointerdown", () => {
   flight = 0;
 });
 
+
 // --- Every frame ---
 const samples = new Float32Array(512);
 const GAIN = 10;

@@ -1,10 +1,10 @@
 import os, warnings
 
 # annoying warning messages muddling my terminal
-os.environ["HF_HUB_OFFLINE"] = "1"
+#os.environ["HF_HUB_OFFLINE"] = "1"
 warnings.filterwarnings("ignore", message=".*pkg_resources is deprecated.*")
 warnings.filterwarnings("ignore", message=".*LoRACompatibleLinear.*")
-import json, re, sys, time, urllib.request, torch, io
+import json, re, subprocess, sys, time, urllib.request, torch, io
 import torchaudio as ta
 import sounddevice as sd
 import soundfile as sf
@@ -27,10 +27,34 @@ whisper = WhisperModel(
     "base.en", device=device, compute_type="float16" if gpu else "int8"
 )
 # Nano keeps up in real time on CPU; Turbo sounds better when a GPU can afford it
-tts = ChatterboxTurboTTS.from_pretrained(device=device, nano=not gpu)
+tts = ChatterboxTurboTTS.from_pretrained(device=device)
 print("models initialized")
 tts.prepare_conditionals(VOICE)
 print("tts initialized")
+OLLAMA_LOG = Path(__file__).parent / "ollama.log"
+
+
+def ensure_ollama():
+    """Starts `ollama serve` if it isn't answering, and waits until it is."""
+    for attempt in range(40):
+        try:
+            urllib.request.urlopen("http://localhost:11434/", timeout=1)
+            return
+        except OSError:  # refused, or timed out while it boots
+            if attempt == 0:
+                print(f"ollama is down, restarting it (log: {OLLAMA_LOG})")
+                # own session so a Ctrl+C aimed at uvicorn doesn't take ollama with it
+                subprocess.Popen(
+                    ["ollama", "serve"],
+                    stdout=open(OLLAMA_LOG, "a"),
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
+            time.sleep(0.5)
+    raise RuntimeError("ollama didn't come back up, check " + str(OLLAMA_LOG))
+
+
+ensure_ollama()
 body = json.dumps({"model": OLLAMA_MODEL, "messages": [], "keep_alive": -1}).encode()
 urllib.request.urlopen(
     urllib.request.Request(
@@ -53,12 +77,14 @@ def AIresponse(heard, history):
     history.append({"role": "user", "content": heard})
     del history[:-MAX_HISTORY]
 
+    ensure_ollama()
     t = time.time()
     body = json.dumps(
         {
             "model": OLLAMA_MODEL,
             "messages": history,
             "stream": True,
+            "keep_alive": -1,  # a restarted ollama would otherwise unload after 5 min
             "think": False,  # Qwen3 thinks by default
         }
     ).encode()
