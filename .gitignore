@@ -1,5 +1,6 @@
 .venv/
 .env
+.cache
 __pycache__/
 static/will.glb
 Assets/headV1/
