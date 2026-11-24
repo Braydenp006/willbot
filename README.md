@@ -7,6 +7,7 @@ This features a webpage with a talking head, allowing you to speak to it through
 Pipeline: browser mic → [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (speech to text) → [Ollama](https://ollama.com) (character LLM) → [Chatterbox](https://github.com/resemble-ai/chatterbox) (voice clone) → three.js head that lip-syncs to the audio.
 
 The personal files (voice sample, 3D head, Modelfile) are not in this repo. You supply your own.
+<img width="870" height="1200" alt="willbot-ui" src="https://github.com/user-attachments/assets/ccbe0120-9f4c-40d8-b5be-2b908024c274" />
 
 ## Setup
 
